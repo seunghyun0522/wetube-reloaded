@@ -22,7 +22,7 @@ export const trending = (req, res) => {
       comments: 2,
       createdAt: "2 minutes ago",
       views: 59,
-      id: 1,
+      id: 11,
     },
   ];
   return res.render("home", { pageTitle: "Home", videos });
