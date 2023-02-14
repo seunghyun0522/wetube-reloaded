@@ -12,7 +12,7 @@ let videos = [
     rating: 5,
     comments: 2,
     createdAt: "2 minutes ago",
-    views: 59,
+    views: 1,
     id: 2,
   },
   {
@@ -27,17 +27,24 @@ let videos = [
 export const trending = (req, res) => {
   return res.render("home", { pageTitle: "Home", videos });
 };
-export const see = (req, res) => {
+export const watch = (req, res) => {
   const { id } = req.params;
   const video = videos[id - 1];
-  res.render("watch", { pageTitle: `Watch ${video.title}` });
+  res.render("watch", { pageTitle: `Watch ${video.title}`, video });
 };
 export const deleteVideo = (req, res) => {
   console.log(req.params);
   res.send("delete Video");
 };
 
-export const edit = (req, res) => res.render("edit");
-export const search = (req, res) => res.send("search videos");
-
-export const upload = (req, res) => res.send("upload videos");
+export const getEdit = (req, res) => {
+  const { id } = req.params;
+  const video = videos[id - 1];
+  return res.render("edit", { pageTitle: `Editing: ${video.title}`, video });
+};
+export const postEdit = (req, res) => {
+  const { title } = req.body;
+  const { id } = req.params;
+  videos[id - 1].title = title;
+  return res.redirect(`/videos/${id}`);
+};
