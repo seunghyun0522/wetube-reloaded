@@ -1,38 +1,34 @@
-let videos = [
-  {
-    title: "First Video",
-    rating: 5,
-    comments: 2,
-    createdAt: "2 minutes ago",
-    views: 59,
-    id: 1,
-  },
-  {
-    title: "Second Video",
-    rating: 5,
-    comments: 2,
-    createdAt: "2 minutes ago",
-    views: 1,
-    id: 2,
-  },
-  {
-    title: "Third Video",
-    rating: 5,
-    comments: 2,
-    createdAt: "2 minutes ago",
-    views: 59,
-    id: 3,
-  },
-];
+import Video from "../models/video";
+/*same Code
+const handleSearch = (error, videos) => {
+  console.log("error", error);
+  console.log("videos", videos);
+};
+*/
+//callback function
+//Video.find({}, (error, videos) => {});
+/*
+video.find({}, (error, videos) => {
+if(error){
+return res.render("server-error")
+}
+return res.render("home")
+});
 
-export const trending = (req, res) => {
-  return res.render("home", { pageTitle: "Home", videos });
+*/
+export const home = async (req, res) => {
+  try {
+    const videos = await Video.find({});
+
+    return res.render("home", { pageTitle: "Home", videos: [] });
+  } catch {
+    return res.render("server-error");
+  }
 };
 
 export const watch = (req, res) => {
   const { id } = req.params;
-  const video = videos[id - 1];
-  res.render("watch", { pageTitle: `Watch ${video.title}`, video });
+  res.render("watch", { pageTitle: `Watch` });
 };
 export const deleteVideo = (req, res) => {
   console.log(req.params);
@@ -41,14 +37,13 @@ export const deleteVideo = (req, res) => {
 
 export const getEdit = (req, res) => {
   const { id } = req.params;
-  const video = videos[id - 1];
-  return res.render("edit", { pageTitle: `Editing: ${video.title}`, video });
+
+  return res.render("edit", { pageTitle: `Editing` });
 };
 
 export const postEdit = (req, res) => {
   const { title } = req.body;
   const { id } = req.params;
-  videos[id - 1].title = title;
   return res.redirect(`/videos/${id}`);
 };
 
@@ -57,14 +52,5 @@ export const getUpload = (req, res) => {
 };
 export const postUpload = (req, res) => {
   const { title } = req.body;
-  const newVideo = {
-    title,
-    rating: 0,
-    comments: 0,
-    createdAt: "just now",
-    views: 59,
-    id: videos.length + 1,
-  };
-  videos.push(newVideo);
   return res.redirect("/");
 };
