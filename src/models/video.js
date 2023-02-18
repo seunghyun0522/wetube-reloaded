@@ -8,7 +8,6 @@ const videoSchema = new mongoose.Schema({
   meta: {
     views: Number,
     rating: Number,
-    hi: Number,
   },
 });
 
