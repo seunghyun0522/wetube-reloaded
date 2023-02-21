@@ -3,7 +3,7 @@ import morgan from "morgan";
 import globalRouter from "./routers/globalRouter";
 import userRouter from "./routers/userRouter";
 import videoRouter from "./routers/videoRouter";
-import * as path from "path";
+
 const app = express();
 const logger = morgan("dev");
 
