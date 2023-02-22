@@ -1,3 +1,4 @@
+import brcypt from "bcrypt";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -6,6 +7,12 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String, required: true },
   location: String,
+});
+
+userSchema.pre("save", async function () {
+  console.log("Users password: ", this.password);
+  this.password = await brcypt.hash(this.password, 5);
+  console.log("Hash password", this.password);
 });
 
 const User = mongoose.model("User", userSchema);
