@@ -100,7 +100,6 @@ export const finishGithubLogin = async (req, res) => {
         },
       })
     ).json();
-
     const emailData = await (
       await fetch(`${apiUrl}/user/emails`, {
         headers: {
@@ -108,7 +107,6 @@ export const finishGithubLogin = async (req, res) => {
         },
       })
     ).json();
-    console.log(emailData);
     const emailObj = emailData.find(
       (email) => email.primary === true && email.verified === true
     );
@@ -204,8 +202,10 @@ export const see = async (req, res) => {
   if (!user) {
     return res.status(404).render("404", { pageTitle: "User not found." });
   }
+  const videos = await Video.find({ owner: user._id });
   return res.render("users/profile", {
     pageTitle: user.name,
     user,
+    videos,
   });
 };
