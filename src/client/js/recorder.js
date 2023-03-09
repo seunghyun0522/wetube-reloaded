@@ -12,9 +12,9 @@ const files = {
   thumb: "thumbnail.jpg",
 };
 
-const downloadFile = (fileURL, fileName) => {
+const downloadFile = (fileUrl, fileName) => {
   const a = document.createElement("a");
-  a.href = fileURL;
+  a.href = fileUrl;
   a.download = fileName;
   document.body.appendChild(a);
   a.click();
@@ -22,14 +22,15 @@ const downloadFile = (fileURL, fileName) => {
 
 const handleDownload = async () => {
   actionBtn.removeEventListener("click", handleDownload);
+
   actionBtn.innerText = "Transcoding...";
   actionBtn.disabled = true;
 
   const ffmpeg = createFFmpeg({
-    corePath: "https://unpkg.com/@ffmpeg/core@0.8.5/dist/ffmpeg-core.js",
+    corePath: "/static/ffmpeg-core.js",
     log: true,
   });
-  await ffmpeg.load(); // ffmpeg 소프트웨어 사용하므로 기다려야함
+  await ffmpeg.load();
 
   ffmpeg.FS("writeFile", files.input, await fetchFile(videoFile));
 
@@ -46,29 +47,26 @@ const handleDownload = async () => {
   );
 
   const mp4File = ffmpeg.FS("readFile", files.output);
-  const mp4Blob = new Blob([mp4File.buffer], { type: "video/mp4" });
-
   const thumbFile = ffmpeg.FS("readFile", files.thumb);
+
+  const mp4Blob = new Blob([mp4File.buffer], { type: "video/mp4" });
   const thumbBlob = new Blob([thumbFile.buffer], { type: "image/jpg" });
 
-  const mp4URL = URL.createObjectURL(mp4Blob);
-  const thumbURL = URL.createObjectURL(thumbBlob);
+  const mp4Url = URL.createObjectURL(mp4Blob);
+  const thumbUrl = URL.createObjectURL(thumbBlob);
 
-  downloadFile(mp4URL, "MyRecording.mp4");
-  downloadFile(thumbURL, "MyThumbnail.jpg");
+  downloadFile(mp4Url, "MyRecording.mp4");
+  downloadFile(thumbUrl, "MyThumbnail.jpg");
 
   ffmpeg.FS("unlink", files.input);
   ffmpeg.FS("unlink", files.output);
   ffmpeg.FS("unlink", files.thumb);
-
-  URL.revokeObjectURL(mp4URL);
-  URL.revokeObjectURL(thumbURL);
-  URL.revokeObjectURL(videoFile);
+  URL.revokeObjectURL(mp4Url);
+  URL.revokeObjectURL(thumbUrl);
 
   actionBtn.disabled = false;
   actionBtn.innerText = "Record Again";
   actionBtn.addEventListener("click", handleStart);
-  init();
 };
 
 const handleStart = () => {
@@ -95,7 +93,10 @@ const handleStart = () => {
 const init = async () => {
   stream = await navigator.mediaDevices.getUserMedia({
     audio: false,
-    video: { facingMode: "user", width: 1280, height: 720 },
+    video: {
+      width: 1024,
+      height: 576,
+    },
   });
   video.srcObject = stream;
   video.play();

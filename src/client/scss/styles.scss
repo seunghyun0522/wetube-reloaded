@@ -1,4 +1,4 @@
-// config
+// Config
 @import "./config/_variables.scss";
 @import "./config/_reset.scss";
 
@@ -14,7 +14,6 @@
 
 // Screens
 
-@import "./screens/home.scss";
 @import "./screens/search.scss";
 @import "./screens/profile.scss";
 @import "./screens/edit-profile.scss";
@@ -22,7 +21,6 @@
 @import "./screens/watch.scss";
 
 // Defaults
-
 a {
   color: inherit;
   text-decoration: none;
@@ -67,6 +65,14 @@ main {
   animation-delay: 5s;
   &.error {
     background-color: tomato;
+    color: white;
+  }
+  &.info {
+    background-color: greenyellow;
+    color: white;
+  }
+  &.success {
+    background-color: skyblue;
     color: white;
   }
 }

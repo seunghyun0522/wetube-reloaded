@@ -2,20 +2,22 @@ import express from "express";
 import {
   getEdit,
   postEdit,
-  see,
   logout,
   startGithubLogin,
   finishGithubLogin,
+  see,
   getChangePassword,
   postChangePassword,
 } from "../controllers/userController";
 import {
-  avatarUpload,
   protectorMiddleware,
   publicOnlyMiddleware,
+  avatarUpload,
 } from "../middlewares";
+
 const userRouter = express.Router();
 
+userRouter.get("/logout", protectorMiddleware, logout);
 userRouter
   .route("/edit")
   .all(protectorMiddleware)
@@ -26,10 +28,9 @@ userRouter
   .all(protectorMiddleware)
   .get(getChangePassword)
   .post(postChangePassword);
-// all -> 어떤 http method에도 적용하겠다는 말
-userRouter.get("/logout", protectorMiddleware, logout);
 userRouter.get("/github/start", publicOnlyMiddleware, startGithubLogin);
 userRouter.get("/github/finish", publicOnlyMiddleware, finishGithubLogin);
+
 userRouter.get("/:id", see);
 
 export default userRouter;
