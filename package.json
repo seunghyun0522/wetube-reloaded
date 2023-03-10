@@ -14,7 +14,7 @@
     "dev:server": "nodemon",
     "dev:assets": "webpack --mode=development -w"
   },
-  "author": "Nicolas Serrano <nico@nomadcoders.co>",
+  "author": "",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/seunghyun0522/wetube-reloaded/issues"
