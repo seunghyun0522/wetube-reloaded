@@ -6,10 +6,6 @@
     "type": "git",
     "url": "git+https://github.com/seunghyun0522/wetube-reloaded.git"
   },
-  "engine": {
-    "node": "19.7.0",
-    "npm": "9.5.0"
-  },
   "scripts": {
     "start": "node build/init.js",
     "build": "npm run build:server && npm run build:assets",
@@ -18,7 +14,7 @@
     "dev:server": "nodemon",
     "dev:assets": "webpack --mode=development -w"
   },
-  "author": "",
+  "author": "Nicolas Serrano <nico@seunghyun0522.co>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/seunghyun0522/wetube-reloaded/issues"
