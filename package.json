@@ -6,10 +6,6 @@
     "type": "git",
     "url": "git+https://github.com/seunghyun0522/wetube-reloaded.git"
   },
-  "engines": {
-    "node": "19.7.0",
-    "npm": "9.5.0"
-  },
   "scripts": {
     "start": "node build/init.js",
     "build": "npm run build:server && npm run build:assets",
