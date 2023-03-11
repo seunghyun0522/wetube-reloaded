@@ -19,7 +19,6 @@
 @import "./screens/edit-profile.scss";
 @import "./screens/upload.scss";
 @import "./screens/watch.scss";
-
 // Defaults
 a {
   color: inherit;
@@ -65,14 +64,6 @@ main {
   animation-delay: 5s;
   &.error {
     background-color: tomato;
-    color: white;
-  }
-  &.info {
-    background-color: greenyellow;
-    color: white;
-  }
-  &.success {
-    background-color: skyblue;
     color: white;
   }
 }

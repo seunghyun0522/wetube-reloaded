@@ -3,9 +3,9 @@ import {
   getEdit,
   postEdit,
   logout,
+  see,
   startGithubLogin,
   finishGithubLogin,
-  see,
   getChangePassword,
   postChangePassword,
 } from "../controllers/userController";
@@ -28,6 +28,7 @@ userRouter
   .all(protectorMiddleware)
   .get(getChangePassword)
   .post(postChangePassword);
+
 userRouter.get("/github/start", publicOnlyMiddleware, startGithubLogin);
 userRouter.get("/github/finish", publicOnlyMiddleware, finishGithubLogin);
 

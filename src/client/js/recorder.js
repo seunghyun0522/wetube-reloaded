@@ -24,12 +24,10 @@ const handleDownload = async () => {
   actionBtn.removeEventListener("click", handleDownload);
 
   actionBtn.innerText = "Transcoding...";
+
   actionBtn.disabled = true;
 
-  const ffmpeg = createFFmpeg({
-    corePath: "/static/ffmpeg-core.js",
-    log: true,
-  });
+  const ffmpeg = createFFmpeg({ log: true });
   await ffmpeg.load();
 
   ffmpeg.FS("writeFile", files.input, await fetchFile(videoFile));
@@ -61,8 +59,10 @@ const handleDownload = async () => {
   ffmpeg.FS("unlink", files.input);
   ffmpeg.FS("unlink", files.output);
   ffmpeg.FS("unlink", files.thumb);
+
   URL.revokeObjectURL(mp4Url);
   URL.revokeObjectURL(thumbUrl);
+  URL.revokeObjectURL(videoFile);
 
   actionBtn.disabled = false;
   actionBtn.innerText = "Record Again";
@@ -73,7 +73,7 @@ const handleStart = () => {
   actionBtn.innerText = "Recording";
   actionBtn.disabled = true;
   actionBtn.removeEventListener("click", handleStart);
-  recorder = new MediaRecorder(stream);
+  recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
   recorder.ondataavailable = (event) => {
     videoFile = URL.createObjectURL(event.data);
     video.srcObject = null;
