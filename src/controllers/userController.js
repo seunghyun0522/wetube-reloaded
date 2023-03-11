@@ -133,14 +133,11 @@ export const finishGithubLogin = async (req, res) => {
   }
 };
 
-//error 수정 - req.flash() requires sessions
 export const logout = (req, res) => {
-  req.session.user = null;
-  req.session.loggedIn = false;
+  req.session.destroy();
   req.flash("info", "Bye Bye");
   return res.redirect("/");
 };
-
 export const getEdit = (req, res) => {
   return res.render("edit-profile", { pageTitle: "Edit Profile" });
 };
