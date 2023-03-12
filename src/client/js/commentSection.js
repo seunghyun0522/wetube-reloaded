@@ -1,28 +1,31 @@
 const videoContainer = document.getElementById("videoContainer");
 const form = document.getElementById("commentForm");
+const deleteBtn = document.querySelectorAll("#deleteCommentBtn");
 
-let deleteComments = document.querySelectorAll("#delete__comment");
-
-const addComment = (text, id) => {
+const addComment = (text, commentId) => {
   const videoComments = document.querySelector(".video__comments ul");
   const newComment = document.createElement("li");
-  newComment.dataset.id = id;
   newComment.className = "video__comment";
-  const icon = document.createElement("i");
+  const icon = document.createElement("icon");
   icon.className = "fas fa-comment";
   const span = document.createElement("span");
   span.innerText = ` ${text}`;
   const span2 = document.createElement("span");
   span2.innerText = "❌";
-  span2.id = "delete__comment";
+  span2.dataset.id = commentId;
+  span2.dataset.videoid = videoContainer.dataset.id;
+  span2.id = "newDeleteCommentBtn";
+  span2.className = "video__comment-delete";
   newComment.appendChild(icon);
   newComment.appendChild(span);
   newComment.appendChild(span2);
   videoComments.prepend(newComment);
+  const newDeleteCommentBtn = document.querySelector("#newDeleteCommentBtn");
+  newDeleteCommentBtn.addEventListener("click", handleClick);
 };
 
 const handleSubmit = async (event) => {
-  event.preventDefault(); // 새로고침 방지
+  event.preventDefault();
   const textarea = form.querySelector("textarea");
   const text = textarea.value;
   const videoId = videoContainer.dataset.id;
@@ -31,39 +34,32 @@ const handleSubmit = async (event) => {
   }
   const response = await fetch(`/api/videos/${videoId}/comment`, {
     method: "POST",
-    headers: { "Content-type": "application/json" }, // information about request
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ text }),
   });
-
+  textarea.value = "";
   if (response.status === 201) {
-    textarea.value = "";
-    const json = await response.json(); // json 추출.
-    addComment(text, json.newCommentId);
-    deleteComment = document.getElementById("delete__comment");
-    deleteComment.removeEventListener("click", handleDeleteComment);
-    deleteComment.addEventListener("click", handleDeleteComment);
+    const { newCommentId } = await response.json();
+    addComment(text, newCommentId);
   }
-  // window.location.reload();
 };
 
-if (form) {
-  form.addEventListener("submit", handleSubmit);
-}
-
-const handleDeleteComment = async (event) => {
-  const li = event.srcElement.parentNode;
-  const {
-    dataset: { id: commentId },
-  } = li;
-
-  await fetch(`/api/comments/${commentId}/delete`, {
+const handleClick = async (event) => {
+  const { id, videoid } = event.target.dataset;
+  const response = await fetch(`/api/videos/${videoid}/comments/${id}/delete`, {
     method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id, videoid }),
   });
-  li.remove();
+  if (response.status === 200) {
+    event.target.parentNode.remove();
+  }
 };
 
-if (deleteComments) {
-  deleteComments.forEach((deleteComment) => {
-    deleteComment.addEventListener("click", handleDeleteComment);
-  });
-}
+if (form) form.addEventListener("submit", handleSubmit);
+if (deleteBtn)
+  deleteBtn.forEach((btn) => btn.addEventListener("click", handleClick));
