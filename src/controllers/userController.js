@@ -5,17 +5,16 @@ import bcrypt from "bcrypt";
 export const getJoin = (req, res) => res.render("join", { pageTitle: "Join" });
 export const postJoin = async (req, res) => {
   const { name, username, email, password, password2, location } = req.body;
-  const pageTitle = "Join";
+  const exists = await User.exists({ $or: [{ username }, { email }] });
   if (password !== password2) {
     return res.status(400).render("join", {
-      pageTitle,
+      pageTitle: "Join",
       errorMessage: "Password confirmation does not match.",
     });
   }
-  const exists = await User.exists({ $or: [{ username }, { email }] });
   if (exists) {
     return res.status(400).render("join", {
-      pageTitle,
+      pageTitle: "Join",
       errorMessage: "This username/email is already taken.",
     });
   }
@@ -27,17 +26,16 @@ export const postJoin = async (req, res) => {
       password,
       location,
     });
-    return res.redirect("/login");
+    res.redirect("/login");
   } catch (error) {
     return res.status(400).render("join", {
-      pageTitle: "Upload Video",
+      pageTitle: "Join",
       errorMessage: error._message,
     });
   }
 };
 export const getLogin = (req, res) =>
   res.render("login", { pageTitle: "Login" });
-
 export const postLogin = async (req, res) => {
   const { username, password } = req.body;
   const pageTitle = "Login";
@@ -56,14 +54,17 @@ export const postLogin = async (req, res) => {
     });
   }
   req.session.loggedIn = true;
-  req.session.user = user;
+  req.session.user = user; // 브라우저 마다 다름!!
+  // 여기서 session initialize하는 부분
+
+  console.log("LOG USER IN! COMING SOON!");
   return res.redirect("/");
 };
-
 export const startGithubLogin = (req, res) => {
   const baseUrl = "https://github.com/login/oauth/authorize";
+  const client_id = process.env.GH_CLIENT;
   const config = {
-    client_id: process.env.GH_CLIENT,
+    client_id,
     allow_signup: false,
     scope: "read:user user:email",
   };
@@ -71,7 +72,6 @@ export const startGithubLogin = (req, res) => {
   const finalUrl = `${baseUrl}?${params}`;
   return res.redirect(finalUrl);
 };
-
 export const finishGithubLogin = async (req, res) => {
   const baseUrl = "https://github.com/login/oauth/access_token";
   const config = {
@@ -81,6 +81,7 @@ export const finishGithubLogin = async (req, res) => {
   };
   const params = new URLSearchParams(config).toString();
   const finalUrl = `${baseUrl}?${params}`;
+
   const tokenRequest = await (
     await fetch(finalUrl, {
       method: "POST",
@@ -89,7 +90,9 @@ export const finishGithubLogin = async (req, res) => {
       },
     })
   ).json();
+
   if ("access_token" in tokenRequest) {
+    //access api
     const { access_token } = tokenRequest;
     const apiUrl = "https://api.github.com";
     const userData = await (
@@ -99,6 +102,7 @@ export const finishGithubLogin = async (req, res) => {
         },
       })
     ).json();
+    console.log(userData);
     const emailData = await (
       await fetch(`${apiUrl}/user/emails`, {
         headers: {
@@ -110,12 +114,11 @@ export const finishGithubLogin = async (req, res) => {
       (email) => email.primary === true && email.verified === true
     );
     if (!emailObj) {
-      // set notification
       return res.redirect("/login");
     }
     let user = await User.findOne({ email: emailObj.email });
     if (!user) {
-      user = await User.create({
+      const user = await User.create({
         avatarUrl: userData.avatar_url,
         name: userData.name,
         username: userData.login,
@@ -124,6 +127,7 @@ export const finishGithubLogin = async (req, res) => {
         socialOnly: true,
         location: userData.location,
       });
+      console.log("Created!");
     }
     req.session.loggedIn = true;
     req.session.user = user;
@@ -132,7 +136,6 @@ export const finishGithubLogin = async (req, res) => {
     return res.redirect("/login");
   }
 };
-
 export const logout = (req, res) => {
   req.session.destroy();
   req.flash("info", "Bye Bye");
@@ -146,21 +149,37 @@ export const postEdit = async (req, res) => {
     session: {
       user: { _id, avatarUrl },
     },
-    body: { name, email, username, location },
+    body: { name, email, username, location }, // ES6방식
     file,
   } = req;
-  const isHeroku = process.env.NODE_ENV === "production";
+  // const i = req.session.user.id 와 같다.
+  // const { name, email, username, location } = req.body;
+  const anotherUser = await User.findOne({ $or: [{ username }, { email }] });
+  if (anotherUser) {
+    if (_id !== anotherUser._id.valueOf()) {
+      console.log("There is same username or email in userDB!");
+      return res.redirect("/users/edit");
+    }
+  }
+
   const updatedUser = await User.findByIdAndUpdate(
     _id,
     {
-      avatarUrl: file ? (isHeroku ? file.location : file.path) : avatarUrl,
+      avatarUrl: file ? file.path : avatarUrl,
       name,
       email,
       username,
       location,
     },
-    { new: true }
+    { new: true } // update하고 나서의 최신 data를 반환, false면 update 전 반환
   );
+  // req.session.user = {
+  //   ...req.session.user, // req.session.user의 내용을 밖으로 꺼내준다.
+  //   name,
+  //   email,
+  //   username,
+  //   location,
+  // };
   req.session.user = updatedUser;
   return res.redirect("/users/edit");
 };
@@ -173,6 +192,7 @@ export const getChangePassword = (req, res) => {
   return res.render("users/change-password", { pageTitle: "Change Password" });
 };
 export const postChangePassword = async (req, res) => {
+  // send notification
   const {
     session: {
       user: { _id },
@@ -184,13 +204,13 @@ export const postChangePassword = async (req, res) => {
   if (!ok) {
     return res.status(400).render("users/change-password", {
       pageTitle: "Change Password",
-      errorMessage: "The current password is incorrect",
+      errorMessage: "The current password is incorrect.",
     });
   }
   if (newPassword !== newPasswordConfirmation) {
     return res.status(400).render("users/change-password", {
       pageTitle: "Change Password",
-      errorMessage: "The password does not match the confirmation",
+      errorMessage: "The password does not match the confirmation.",
     });
   }
   user.password = newPassword;
@@ -208,9 +228,11 @@ export const see = async (req, res) => {
       model: "User",
     },
   });
+  console.log(user);
   if (!user) {
-    return res.status(404).render("404", { pageTitle: "User not found." });
+    return res.status(404).render("404", { pageTitle: "User not found" });
   }
+
   return res.render("users/profile", {
     pageTitle: user.name,
     user,
