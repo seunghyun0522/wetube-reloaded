@@ -6,14 +6,13 @@ const userSchema = new mongoose.Schema({
   avatarUrl: String,
   socialOnly: { type: Boolean, default: false },
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: false },
+  password: { type: String },
   name: { type: String, required: true },
   location: String,
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
   videos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Video" }],
 });
 
-//password 암호화
 userSchema.pre("save", async function () {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 5);
